@@ -55,6 +55,9 @@ echo "    OK – $ENV_FILE ist syntaktisch valide."
 
 cp "$ENV_FILE" .env
 
+# Postgres-Datenverzeichnis muss existieren (Bind-Mount-Ziel)
+mkdir -p backend/data
+
 docker compose down
 docker compose build --no-cache app
 docker compose up -d
