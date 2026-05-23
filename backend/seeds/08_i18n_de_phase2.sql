@@ -1,0 +1,32 @@
+INSERT INTO i18n (key, locale, value) VALUES
+('phase2.next_workout.title',     'de', 'Fitness Buddy – nächste Einheit'),
+('phase2.next_workout.body',      'de', 'Deine Muskulatur ist regeneriert – Zeit für die nächste Einheit!'),
+('phase2.stretch.title',          'de', 'Cooldown – Dehnprogramm'),
+('phase2.stretch.intro',          'de', 'Diese Dehnübungen helfen deiner Regeneration. Je 15–30 Sekunden pro Position, beide Seiten.'),
+('phase2.stretch.skip',           'de', 'Überspringen'),
+('phase2.stretch.done',           'de', 'Erledigt'),
+('phase2.intake.title',           'de', 'Einnahmen'),
+('phase2.intake.protein_shake',   'de', 'Eiweiß-Shake'),
+('phase2.intake.creatine',        'de', 'Kreatin'),
+('phase2.intake.water',           'de', 'Wasser'),
+('phase2.intake.add',             'de', 'Einnahme erfassen'),
+('phase2.intake.amount',          'de', 'Menge'),
+('phase2.calendar.download',      'de', 'Termin als Kalender (.ics) laden'),
+('phase2.push.enable',            'de', 'Push-Erinnerungen aktivieren'),
+('phase2.push.enabled',           'de', 'Erinnerungen aktiv'),
+('phase2.push.denied',            'de', 'Im Browser blockiert – bitte in den Browser-Einstellungen erlauben'),
+('phase2.recovered_in',           'de', 'Erholung bis'),
+('phase2.calorie_summary',        'de', 'Verbrannt: {kcal} kcal'),
+
+-- Dehnübungs-Namen (Kurz-Keys, im Frontend hardcoded gemappt)
+('stretch.chest_doorway',  'de', 'Brustdehnung im Türrahmen'),
+('stretch.hipflexor',      'de', 'Hüftbeuger im Ausfallschritt'),
+('stretch.hamstring_sit',  'de', 'Hamstrings im Sitzen'),
+('stretch.lat_wall',       'de', 'Latissimus an der Wand'),
+('stretch.calf_step',      'de', 'Wade an der Stufe'),
+('stretch.quad_standing',  'de', 'Quadrizeps im Stand'),
+('stretch.glute_pigeon',   'de', 'Glutes (Tauben-Position)'),
+('stretch.tricep_overhead','de', 'Trizeps über Kopf'),
+('stretch.shoulder_cross', 'de', 'Schulter über die Brust'),
+('stretch.cat_cow',        'de', 'Katze-Kuh (Wirbelsäule)')
+ON CONFLICT (key, locale) DO UPDATE SET value = EXCLUDED.value;
