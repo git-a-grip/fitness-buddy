@@ -22,6 +22,10 @@ esac
 
 echo "==> Deploying fitness-buddy ($ENV_NAME, branch $BRANCH)"
 
+# Idempotent: dieses Verzeichnis als safe markieren, falls Owner ≠ aktueller User
+# (kommt vor, wenn Repo wedon gehört und Script unter sudo läuft)
+git config --global --add safe.directory "$(pwd)" 2>/dev/null || true
+
 git fetch --all
 git checkout "$BRANCH"
 git pull origin "$BRANCH"
