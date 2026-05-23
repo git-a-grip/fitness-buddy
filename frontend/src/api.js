@@ -23,6 +23,8 @@ export const api = {
   // Auth
   register: (data) => req('POST', '/auth/register', data),
   login:    (data) => req('POST', '/auth/login', data),
+  me:       () => req('GET', '/auth/me'),
+  updateMe: (data) => req('PATCH', '/auth/me', data),
 
   // Muscles
   muscles:        () => req('GET', '/muscles'),

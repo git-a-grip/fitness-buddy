@@ -3,6 +3,7 @@ import { api } from '../api.js';
 import { useT } from '../state/i18n.jsx';
 import { useAuth } from '../state/auth.jsx';
 import { enablePushNotifications, pushPermissionState } from '../lib/push.js';
+import ProfileEditor from '../components/ProfileEditor.jsx';
 
 export default function SettingsPage() {
   const { t, locale, setLocale } = useT();
@@ -44,8 +45,8 @@ export default function SettingsPage() {
         <div className="card">
           <h2>{t('settings.profile','Profil')}</h2>
           <p className="muted">{user?.email}</p>
-          <p className="muted">Gewicht: {user?.weight_kg || '–'} kg</p>
-          <button onClick={logout}>{t('nav.logout','Abmelden')}</button>
+          <ProfileEditor />
+          <button onClick={logout} style={{marginTop:'0.6rem'}}>{t('nav.logout','Abmelden')}</button>
         </div>
 
         <div className="card">
@@ -71,7 +72,7 @@ export default function SettingsPage() {
           <h2>{t('settings.language','Sprache')}</h2>
           <select value={locale} onChange={e => setLocale(e.target.value)} style={{maxWidth: 240}}>
             <option value="de">Deutsch</option>
-            <option value="en">English (in Vorbereitung)</option>
+            <option value="en">English</option>
             <option value="es">Español (in Vorbereitung)</option>
           </select>
         </div>

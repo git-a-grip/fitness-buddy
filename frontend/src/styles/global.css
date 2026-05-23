@@ -17,6 +17,8 @@
   --muscle-mid:    #d97757;
   --muscle-deep:   #d94343;
   --muscle-overtrained-stroke: #fbbf24;
+  --skin-bg:       #1d2230;
+  --landmark:      #0e1014;
 }
 
 * { box-sizing: border-box; }
@@ -145,14 +147,27 @@ main { flex: 1; padding: 1rem; padding-bottom: 1.5rem; max-width: 720px; margin:
   background: var(--bg-elev); border-radius: 0.6rem;
 }
 .body-svg .muscle {
-  fill: var(--muscle-gray);
-  stroke: #20242e; stroke-width: 0.6;
-  transition: fill 200ms ease, stroke 200ms ease;
   cursor: pointer;
+  transition: fill 200ms ease, stroke 200ms ease;
 }
-.body-svg .muscle:hover { stroke: var(--accent-2); stroke-width: 1.2; }
+.body-svg .muscle:hover { stroke: var(--accent-2) !important; stroke-width: 1.0 !important; }
+.body-svg .muscle path {
+  transition: fill 200ms ease;
+  vector-effect: non-scaling-stroke;
+}
 .body-svg .outline {
   fill: none; stroke: #2a3142; stroke-width: 0.8;
+}
+.body-svg .skin {
+  fill: var(--skin-bg);
+  stroke: none;
+}
+.body-svg .landmark {
+  fill: none;
+  stroke: var(--landmark);
+  stroke-width: 0.5;
+  stroke-linecap: round;
+  opacity: 0.75;
 }
 
 .tooltip {
@@ -167,6 +182,43 @@ main { flex: 1; padding: 1rem; padding-bottom: 1.5rem; max-width: 720px; margin:
   max-width: 220px;
 }
 .tooltip .la { color: var(--text-dim); font-style: italic; font-size: 0.78rem; }
+
+.muscle-action {
+  margin-top: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--accent);
+  border-radius: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.muscle-action .la { color: var(--text-dim); font-style: italic; font-size: 0.78rem; }
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--accent-2);
+  border-radius: 0.4rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+.involvement-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 1px 6px;
+  border-radius: 999px;
+  margin-left: 0.4rem;
+}
+.involvement-badge.primary    { background: rgba(239, 68, 68, 0.18);  color: #fca5a5; border: 1px solid #ef4444; }
+.involvement-badge.secondary  { background: rgba(250, 204, 21, 0.15); color: #fde68a; border: 1px solid #facc15; }
+.involvement-badge.stabilizer { background: rgba(148, 163, 184, 0.15);color: #cbd5e1; border: 1px solid #94a3b8; }
 
 .kbd-num {
   display: inline-block;

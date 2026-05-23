@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FrontBodySVG, BackBodySVG } from './MuscleSVG.jsx';
 import { api } from '../api.js';
 import { useT } from '../state/i18n.jsx';
@@ -17,10 +18,12 @@ function fatigueColor(fat) {
 
 export default function MuscleMap({ refreshKey }) {
   const { t, locale } = useT();
+  const nav = useNavigate();
   const [state, setState]   = useState({});         // slug -> {fatigue, ...}
   const [muscles, setMuscles] = useState([]);       // catalog
   const [over, setOver] = useState([]);             // overtrained slugs
   const [tooltip, setTooltip] = useState(null);
+  const [selected, setSelected] = useState(null);   // {slug, name_de, name_la}
   const ttRef = useRef(null);
 
   useEffect(() => {
@@ -44,6 +47,17 @@ export default function MuscleMap({ refreshKey }) {
 
   const getFill   = (slug) => fatigueColor(state[slug]?.fatigue || 0);
   const getStroke = (slug) => over.includes(slug) ? 'var(--muscle-overtrained-stroke)' : undefined;
+
+  const onMuscleClick = (slug) => {
+    const m = muscleBySlug[slug];
+    if (!m) return;
+    setSelected({ slug, name_de: t(m.name_key, slug), name_la: m.name_la });
+  };
+
+  const goSpecialize = () => {
+    if (!selected) return;
+    nav(`/workout?muscle=${encodeURIComponent(selected.slug)}`);
+  };
 
   const showTip = (slug, e) => {
     const m = muscleBySlug[slug];
@@ -79,6 +93,7 @@ export default function MuscleMap({ refreshKey }) {
             getStroke={getStroke}
             onMuscleEnter={showTip}
             onMuscleLeave={hideTip}
+            onMuscleClick={onMuscleClick}
           />
         </div>
         <div>
@@ -88,9 +103,29 @@ export default function MuscleMap({ refreshKey }) {
             getStroke={getStroke}
             onMuscleEnter={showTip}
             onMuscleLeave={hideTip}
+            onMuscleClick={onMuscleClick}
           />
         </div>
       </div>
+
+      {selected ? (
+        <div className="muscle-action" role="region" aria-label="Muskelauswahl">
+          <div>
+            <strong>{selected.name_de}</strong>
+            <div className="la">{selected.name_la}</div>
+          </div>
+          <div className="row" style={{gap:'0.4rem'}}>
+            <button className="ghost" onClick={() => setSelected(null)} aria-label="Auswahl aufheben">×</button>
+            <button className="primary" onClick={goSpecialize}>
+              {t('home.specialize.cta','Übungen für {muscle} zeigen').replace('{muscle}', selected.name_de)}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="muted" style={{fontSize:'0.82rem', marginTop:'0.6rem'}}>
+          {t('home.muscle_click_hint','Tipp: Tippe einen Muskel an, um gezielt Übungen dafür zu sehen.')}
+        </p>
+      )}
 
       {tooltip && (
         <div ref={ttRef} className="tooltip" style={{ left: tooltip.x, top: tooltip.y }}>

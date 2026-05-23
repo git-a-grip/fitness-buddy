@@ -22,6 +22,9 @@ INSERT INTO i18n (key, locale, value) VALUES
 ('auth.sex.m',         'de', 'männlich'),
 ('auth.sex.f',         'de', 'weiblich'),
 ('auth.sex.d',         'de', 'divers'),
+('auth.body_fat',      'de', 'Körperfett (%)'),
+('auth.muscle_pct',    'de', 'Muskelanteil (%)'),
+('auth.body_fat_hint', 'de', 'optional – sonst Referenzwerte für Untrainierte'),
 ('auth.no_account',    'de', 'Noch kein Konto?'),
 ('auth.have_account',  'de', 'Bereits ein Konto?'),
 
@@ -35,6 +38,9 @@ INSERT INTO i18n (key, locale, value) VALUES
 ('home.fatigued',      'de', 'stark belastet'),
 ('home.suggest',       'de', 'Vorschlag: nächste Übung'),
 ('home.start_workout', 'de', 'Training starten'),
+('home.specialize',    'de', 'Spezial-Training für {muscle}'),
+('home.specialize.cta','de', 'Übungen für {muscle} zeigen'),
+('home.muscle_click_hint','de','Tipp: Tippe einen Muskel an, um gezielt Übungen dafür zu sehen.'),
 ('home.end_workout',   'de', 'Training beenden'),
 ('home.active_workout','de', 'Laufendes Training'),
 
@@ -52,7 +58,13 @@ INSERT INTO i18n (key, locale, value) VALUES
 ('workout.total_kcal', 'de', 'Gesamt-kcal'),
 ('workout.recovered_at','de','Erholung voraussichtlich bis'),
 ('workout.no_active',  'de', 'Kein aktives Training. Tippe auf „Training starten"'),
-('workout.search_exercise','de', 'Übung suchen…'),
+('workout.search_exercise','de', 'Übung suchen oder (Muskel)…'),
+('workout.muscle_filter',  'de', 'Muskelfilter aktiv:'),
+('workout.muscle_filter_clear','de','Filter aufheben'),
+('workout.sorted_by_eff',  'de', 'sortiert nach Effektivität'),
+('involvement.primary.short',   'de','primär'),
+('involvement.secondary.short', 'de','sekundär'),
+('involvement.stabilizer.short','de','stabilisierend'),
 
 -- Stats
 ('stats.title',        'de', 'Statistik'),
@@ -75,6 +87,9 @@ INSERT INTO i18n (key, locale, value) VALUES
 -- Settings
 ('settings.title',        'de', 'Einstellungen'),
 ('settings.profile',      'de', 'Profil'),
+('settings.profile.edit', 'de', 'Profil bearbeiten'),
+('settings.profile.saved','de', 'Gespeichert'),
+('settings.composition_defaults','de','Standardwerte für Untrainierte werden verwendet, wenn leer gelassen'),
 ('settings.packages',     'de', 'Geräte-Pakete'),
 ('settings.installed',    'de', 'installiert'),
 ('settings.install',      'de', 'installieren'),
@@ -82,6 +97,10 @@ INSERT INTO i18n (key, locale, value) VALUES
 ('settings.custom_exercises','de','Eigene Übungen'),
 ('settings.add_custom',   'de', 'Eigene Übung anlegen'),
 ('settings.language',     'de', 'Sprache'),
+
+-- Knowledge Navigation
+('knowledge.prev',  'de', 'vorheriger'),
+('knowledge.next',  'de', 'nächster'),
 
 -- Common
 ('common.save',     'de', 'Speichern'),

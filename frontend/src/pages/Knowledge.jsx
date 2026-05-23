@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../api.js';
 import { useT } from '../state/i18n.jsx';
 import { SVG_MAP } from '../components/KnowledgeSvg.jsx';
@@ -47,10 +47,35 @@ export default function KnowledgePage() {
   const { t } = useT();
   const [articles, setArticles] = useState([]);
   const [open, setOpen] = useState(null);
+  const touchStartX = useRef(null);
 
   useEffect(() => {
     api.knowledge().then(setArticles);
   }, []);
+
+  // Pfeiltasten-Navigation im Detailmodus
+  useEffect(() => {
+    if (!open) return;
+    const idx = articles.findIndex(a => a.slug === open.slug);
+    const onKey = (e) => {
+      if (e.key === 'ArrowLeft'  && idx > 0)                       setOpen(articles[idx - 1]);
+      if (e.key === 'ArrowRight' && idx >= 0 && idx < articles.length - 1) setOpen(articles[idx + 1]);
+      if (e.key === 'Escape')                                       setOpen(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, articles]);
+
+  function onTouchStart(e) { touchStartX.current = e.touches[0].clientX; }
+  function onTouchEnd(e) {
+    if (touchStartX.current == null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) < 60) return;
+    const idx = articles.findIndex(a => a.slug === open.slug);
+    if (dx < 0 && idx >= 0 && idx < articles.length - 1) setOpen(articles[idx + 1]);
+    if (dx > 0 && idx > 0)                               setOpen(articles[idx - 1]);
+  }
 
   const byCat = articles.reduce((acc, a) => {
     (acc[a.category] ||= []).push(a);
@@ -64,6 +89,9 @@ export default function KnowledgePage() {
 
   if (open) {
     const body = t(open.body_key, '');
+    const idx = articles.findIndex(a => a.slug === open.slug);
+    const prev = idx > 0 ? articles[idx - 1] : null;
+    const next = idx >= 0 && idx < articles.length - 1 ? articles[idx + 1] : null;
     return (
       <>
         <header className="topbar">
@@ -73,7 +101,38 @@ export default function KnowledgePage() {
           <h1>{t('nav.knowledge','Wissen')}</h1>
           <div style={{width: 22}} />
         </header>
-        <main>
+        <main onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+          <div className="grid-2" style={{gap:'0.5rem', marginBottom:'0.6rem'}}>
+            <button className="ghost" disabled={!prev}
+                    onClick={() => prev && setOpen(prev)}
+                    style={{textAlign:'left', padding:'0.7rem 0.8rem', minHeight:64}}>
+              {prev
+                ? <div>
+                    <div className="muted" style={{fontSize:'0.74rem', display:'flex', alignItems:'center', gap:4}}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+                      {t('knowledge.prev','vorheriger')}
+                    </div>
+                    <div style={{fontSize:'0.92rem', marginTop:2}}>{t(prev.title_key, prev.slug)}</div>
+                  </div>
+                : <div className="muted" style={{fontSize:'0.82rem'}}>—</div>
+              }
+            </button>
+            <button className="ghost" disabled={!next}
+                    onClick={() => next && setOpen(next)}
+                    style={{textAlign:'right', padding:'0.7rem 0.8rem', minHeight:64}}>
+              {next
+                ? <div>
+                    <div className="muted" style={{fontSize:'0.74rem', display:'flex', alignItems:'center', gap:4, justifyContent:'flex-end'}}>
+                      {t('knowledge.next','nächster')}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </div>
+                    <div style={{fontSize:'0.92rem', marginTop:2}}>{t(next.title_key, next.slug)}</div>
+                  </div>
+                : <div className="muted" style={{fontSize:'0.82rem'}}>—</div>
+              }
+            </button>
+          </div>
+
           <article className="card knowledge-article">
             <h2>{t(open.title_key, open.slug)}</h2>
             {renderBody(body)}

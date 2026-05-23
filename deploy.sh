@@ -31,6 +31,24 @@ if [ ! -f "$ENV_FILE" ]; then
   exit 1
 fi
 
+# Validierung: jede nicht-leere, nicht-kommentierte Zeile muss KEY=VALUE sein.
+echo "==> Prüfe $ENV_FILE"
+line_no=0
+while IFS= read -r line || [ -n "$line" ]; do
+  line_no=$((line_no + 1))
+  # Leerzeilen und Kommentare ignorieren
+  [ -z "$line" ] && continue
+  case "$line" in \#*) continue ;; esac
+  # Muss mit gültigem Variablennamen anfangen: [A-Za-z_][A-Za-z0-9_]*=
+  if ! echo "$line" | grep -qE '^[A-Za-z_][A-Za-z0-9_]*='; then
+    echo "FEHLER: $ENV_FILE Zeile $line_no ist keine gültige KEY=VALUE-Zuweisung:"
+    echo "  > $line"
+    echo "Bitte korrigieren und erneut ausführen."
+    exit 1
+  fi
+done < "$ENV_FILE"
+echo "    OK – $ENV_FILE ist syntaktisch valide."
+
 cp "$ENV_FILE" .env
 
 docker compose down

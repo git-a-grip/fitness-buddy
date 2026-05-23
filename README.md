@@ -45,9 +45,26 @@ App: <http://localhost:8088>
 
 Branch-Strategie: `dev` und `prod`.
 
+**Projektpfad auf der NAS:** `/volume1/homes/wedon/Drive/fitness-buddy-{dev,prod}` – nicht `/root/...`.
+
+**Erstinstallation:**
+
 ```bash
+cd /volume1/homes/wedon/Drive
+sudo git clone -b dev git@github.com:git-a-grip/fitness-buddy.git fitness-buddy-dev
+cd fitness-buddy-dev
+sudo cp .env.example .env.dev
+sudo vim .env.dev   # POSTGRES_PASSWORD, JWT_SECRET, VAPID-Keys eintragen
 sudo ./deploy.sh dev
-sudo ./deploy.sh prod
+
+```
+
+**Updates:**
+
+```bash
+cd /volume1/homes/wedon/Drive/fitness-buddy-dev
+sudo ./deploy.sh dev
+
 ```
 
 Ports (NAS):

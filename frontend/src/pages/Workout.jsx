@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api.js';
 import { useT } from '../state/i18n.jsx';
 import StretchProgram from '../components/StretchProgram.jsx';
 
+const INVOLVEMENT_RANK = { primary: 3, secondary: 2, stabilizer: 1 };
+
 export default function WorkoutPage() {
   const { t } = useT();
   const nav = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [active, setActive] = useState(null);
   const [exercises, setExercises] = useState([]);
+  const [muscles, setMuscles] = useState([]);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState({ sets:'3', reps:'10', weight_kg:'', duration_s:'', rpe:'' });
@@ -19,16 +23,84 @@ export default function WorkoutPage() {
   useEffect(() => {
     api.activeWorkout().then(setActive);
     api.exercises().then(setExercises);
+    api.muscles().then(setMuscles);
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return exercises.slice(0, 30);
-    return exercises.filter(e => {
+  // URL ?muscle=slug → in Klammer-Syntax umsetzen, sobald der Muskelkatalog da ist
+  useEffect(() => {
+    const slug = searchParams.get('muscle');
+    if (!slug || muscles.length === 0) return;
+    const m = muscles.find(x => x.slug === slug);
+    if (!m) return;
+    const name = t(m.name_key, slug);
+    setQuery(`(${name})`);
+  }, [muscles, searchParams, t]);
+
+  // Erkennt Bracket-Syntax "(brust)" oder "(pectoralis)" und filtert reverse über Muskel → Übungen.
+  // Sortiert dabei nach Effektivität: primary > secondary > stabilizer.
+  const { filtered, muscleFilter } = useMemo(() => {
+    const raw = query.trim();
+    const bracket = raw.match(/^\((.+)\)$/);
+
+    if (bracket) {
+      const needle = bracket[1].trim().toLowerCase();
+      if (!needle) return { filtered: exercises.slice(0, 30), muscleFilter: null };
+
+      // Muskel finden: über DE-Name (i18n), lateinisch oder Slug
+      const matchedMuscles = muscles.filter(m => {
+        const de = (t(m.name_key, '') || '').toLowerCase();
+        const la = (m.name_la || '').toLowerCase();
+        return de.includes(needle) || la.includes(needle) || m.slug.includes(needle);
+      });
+      if (matchedMuscles.length === 0) {
+        return { filtered: [], muscleFilter: { name: bracket[1], notFound: true } };
+      }
+      const matchedSlugs = new Set(matchedMuscles.map(m => m.slug));
+
+      // Übungen mit beteiligtem Muskel + Effektivität bestimmen
+      const scored = [];
+      for (const e of exercises) {
+        let best = 0;
+        for (const mEntry of e.muscles || []) {
+          if (matchedSlugs.has(mEntry.muscle_slug)) {
+            const r = INVOLVEMENT_RANK[mEntry.involvement] || 0;
+            if (r > best) {
+              best = r;
+              e._matchedInvolvement = mEntry.involvement;
+            }
+          }
+        }
+        if (best > 0) scored.push({ e, score: best });
+      }
+      scored.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        // gleiche Effektivität → Cardio vor Strength bei Cardio-Muskeln? Nein: alphabetisch.
+        return (t(a.e.name_key, a.e.slug) || '').localeCompare(t(b.e.name_key, b.e.slug) || '');
+      });
+
+      return {
+        filtered: scored.slice(0, 40).map(s => s.e),
+        muscleFilter: {
+          name: matchedMuscles.map(m => t(m.name_key, m.slug)).join(' / '),
+        },
+      };
+    }
+
+    // Normaler Volltext über Übungsname/Slug
+    const q = raw.toLowerCase();
+    if (!q) return { filtered: exercises.slice(0, 30), muscleFilter: null };
+    const out = exercises.filter(e => {
       const name = (t(e.name_key, e.slug) || '').toLowerCase();
       return name.includes(q) || e.slug.includes(q);
     }).slice(0, 30);
-  }, [exercises, query, t]);
+    return { filtered: out, muscleFilter: null };
+  }, [exercises, muscles, query, t]);
+
+  function clearMuscleFilter() {
+    setQuery('');
+    searchParams.delete('muscle');
+    setSearchParams(searchParams, { replace: true });
+  }
 
   const set = k => e => setForm({ ...form, [k]: e.target.value });
 
@@ -127,9 +199,27 @@ export default function WorkoutPage() {
         )}
 
         <div className="card">
-          <input placeholder={t('workout.search_exercise','Übung suchen…')}
+          <input placeholder={t('workout.search_exercise','Übung suchen oder (Muskel)…')}
             value={query} onChange={e => setQuery(e.target.value)} />
-          <ul className="stack" style={{listStyle:'none', padding:0, margin:'0.6rem 0 0', maxHeight: 240, overflowY:'auto'}}>
+
+          {muscleFilter && (
+            <div className="filter-bar" style={{marginTop:'0.5rem'}}>
+              <div>
+                <span className="muted">{t('workout.muscle_filter','Muskelfilter aktiv:')}</span>{' '}
+                <strong>{muscleFilter.name}</strong>
+                {!muscleFilter.notFound && (
+                  <div className="muted" style={{fontSize:'0.74rem'}}>
+                    {t('workout.sorted_by_eff','sortiert nach Effektivität')}
+                  </div>
+                )}
+              </div>
+              <button className="ghost" onClick={clearMuscleFilter}>
+                {t('workout.muscle_filter_clear','Filter aufheben')}
+              </button>
+            </div>
+          )}
+
+          <ul className="stack" style={{listStyle:'none', padding:0, margin:'0.6rem 0 0', maxHeight: 320, overflowY:'auto'}}>
             {filtered.map(e => (
               <li key={e.id}
                   onClick={() => setSelected(e)}
@@ -141,12 +231,25 @@ export default function WorkoutPage() {
                     borderBottom: '1px solid var(--border)'
                   }}>
                 <div className="row between">
-                  <span>{t(e.name_key, e.slug)}</span>
+                  <span>
+                    {t(e.name_key, e.slug)}
+                    {muscleFilter && e._matchedInvolvement && (
+                      <span className={`involvement-badge ${e._matchedInvolvement}`}>
+                        {t(`involvement.${e._matchedInvolvement}.short`, e._matchedInvolvement)}
+                      </span>
+                    )}
+                  </span>
                   <span className="pill">{e.category}</span>
                 </div>
               </li>
             ))}
-            {filtered.length === 0 && <li className="muted">Keine Treffer</li>}
+            {filtered.length === 0 && (
+              <li className="muted">
+                {muscleFilter?.notFound
+                  ? `Kein Muskel gefunden für „${muscleFilter.name}".`
+                  : 'Keine Treffer'}
+              </li>
+            )}
           </ul>
         </div>
 

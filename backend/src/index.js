@@ -17,6 +17,7 @@ import pushRoutes from './routes/push.js';
 import calendarRoutes from './routes/calendar.js';
 import intakeRoutes from './routes/intakes.js';
 import stretchRoutes from './routes/stretching.js';
+import healthRoutes from './routes/health.js';
 import { startReminderLoop } from './services/push.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -25,8 +26,7 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
-app.get('/api/health', (_req, res) => res.json({ ok: true }));
-
+app.use('/api/health',       healthRoutes);
 app.use('/api/auth',         authRoutes);
 app.use('/api/muscles',      muscleRoutes);
 app.use('/api/exercises',    exerciseRoutes);
