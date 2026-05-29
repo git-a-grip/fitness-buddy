@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '../api.js';
 import { useT } from '../state/i18n.jsx';
 import { SVG_MAP } from '../components/KnowledgeSvg.jsx';
+import OneRMCalculator from '../components/OneRMCalculator.jsx';
+
+const CALCULATOR_MAP = {
+  '1rm': OneRMCalculator,
+};
 
 // Minimaler Markdown-Renderer: **bold**, Aufzählungen (-), Absätze, [[svg:xxx]]
 function renderBody(text) {
@@ -15,6 +20,12 @@ function renderBody(text) {
     if (svgMatch) {
       const SVG = SVG_MAP[svgMatch[1]];
       out.push(SVG ? <SVG key={i} /> : null);
+      continue;
+    }
+    const calcMatch = p.match(/^\[\[calculator:([a-z0-9_]+)\]\]$/);
+    if (calcMatch) {
+      const Calc = CALCULATOR_MAP[calcMatch[1]];
+      out.push(Calc ? <Calc key={i} /> : null);
       continue;
     }
     if (p.startsWith('- ')) {

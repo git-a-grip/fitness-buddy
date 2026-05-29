@@ -96,6 +96,22 @@ r.delete('/sets/:setId', authRequired, async (req, res) => {
   res.json({ ok: true });
 });
 
+// Letzten Kraft-Satz des Nutzers (für 1RM-Rechner)
+r.get('/last-strength-set', authRequired, async (req, res) => {
+  const { rows } = await query(`
+    SELECT ws.id, ws.reps, ws.weight_kg, ws.performed_at,
+           e.slug AS exercise_slug, e.name_key
+    FROM workout_sets ws
+    JOIN workouts w   ON w.id = ws.workout_id AND w.user_id = $1
+    JOIN exercises e  ON e.id = ws.exercise_id
+    WHERE e.category = 'strength'
+      AND ws.weight_kg IS NOT NULL AND ws.weight_kg > 0
+      AND ws.reps IS NOT NULL AND ws.reps > 0
+    ORDER BY ws.performed_at DESC
+    LIMIT 1`, [req.user.id]);
+  res.json(rows[0] || null);
+});
+
 r.get('/history', authRequired, async (req, res) => {
   const { rows } = await query(`
     SELECT w.id, w.started_at, w.ended_at,

@@ -69,6 +69,9 @@ export const api = {
   // Suggestions
   nextSuggestions:(limit = 5) => req('GET', `/suggestions/next?limit=${limit}`),
 
+  // 1RM – letzten Kraft-Satz laden
+  lastStrengthSet: () => req('GET', '/workouts/last-strength-set'),
+
   // Push
   vapidKey:       () => req('GET', '/push/vapid_public_key'),
   pushSubscribe:  (sub) => req('POST', '/push/subscribe', sub),
