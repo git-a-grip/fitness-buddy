@@ -39,8 +39,24 @@ services:
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
       VAPID_SUBJECT: ${VAPID_SUBJECT}
-    ports:
-      - "${APP_PORT}:3000"
+    # Kein Host-Port mehr — nur intern über Docker-Netz erreichbar.
+    # Der edge-Container übernimmt APP_PORT nach außen.
     volumes:
       - ./backend/migrations:/app/migrations:ro
       - ./backend/seeds:/app/seeds:ro
+
+  # Schlanker Reverse-Proxy davor. Übernimmt APP_PORT und zeigt eine gebrandete
+  # Wartungsseite, falls der App-Container gerade nicht läuft (z. B. während
+  # eines Deploys). Wird fast nie neu gebaut und bleibt daher über App-Deploys
+  # hinweg oben — so ist die Wartungsseite immer erreichbar.
+  edge:
+    image: nginx:alpine
+    container_name: fitness-buddy-edge
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT}:80"
+    volumes:
+      - ./edge/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./edge/maintenance.html:/usr/share/nginx/html/maintenance.html:ro
+    depends_on:
+      - app

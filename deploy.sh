@@ -58,7 +58,8 @@ cp "$ENV_FILE" .env
 # Postgres-Datenverzeichnis muss existieren (Bind-Mount-Ziel)
 mkdir -p backend/data
 
-docker compose down
+# Kein `down` — der edge-Container bleibt oben und zeigt die Wartungsseite,
+# während app neu gebaut wird. Nur app neu bauen, dann alles hochfahren.
 docker compose build --no-cache app
 docker compose up -d
 
