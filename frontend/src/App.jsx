@@ -7,6 +7,7 @@ import HomePage from './pages/Home.jsx';
 import WorkoutPage from './pages/Workout.jsx';
 import StatsPage from './pages/Stats.jsx';
 import KnowledgePage from './pages/Knowledge.jsx';
+import HaltungPage from './pages/Haltung.jsx';
 import SettingsPage from './pages/Settings.jsx';
 
 function Tabbar() {
@@ -27,6 +28,8 @@ function Tabbar() {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 20h18M6 16v-4M11 16v-8M16 16v-6M21 16v-2"/></svg>)}
       {tab('/knowledge', t('nav.knowledge', 'Wissen'),
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 5a2 2 0 012-2h11v18H6a2 2 0 01-2-2V5z"/><path d="M17 3h2v18h-2"/></svg>)}
+      {tab('/haltung', t('nav.posture', 'Haltung'),
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="4.5" r="2"/><path d="M12 7v6M12 9l-4 2M12 9l4 2M9 21l3-8 3 8"/></svg>)}
       {tab('/settings', t('nav.settings', 'Einstellungen'),
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>)}
     </nav>
@@ -58,6 +61,7 @@ export default function App() {
         <Route path="/workout"    element={<WorkoutPage />} />
         <Route path="/stats"      element={<StatsPage />} />
         <Route path="/knowledge"  element={<KnowledgePage />} />
+        <Route path="/haltung"    element={<HaltungPage />} />
         <Route path="/settings"   element={<SettingsPage />} />
         <Route path="*"           element={<Navigate to="/" replace />} />
       </Routes>
