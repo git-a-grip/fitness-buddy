@@ -3,7 +3,10 @@
 Projekt: fitness-buddy
 Repo: /Users/manuelwedemeier/Documents/Claude Projects/fitness-buddy
 Remote: git@github.com:git-a-grip/fitness-buddy.git
-Stand: 2026-08-04, Commit 698fe0f auf Branch dev
+Stand: 2026-08-04, Branch dev
+Code-Stand der Verweise: Commit 698fe0f. `HEAD` ist neuer (25b5490 „docs: Übergabestand"),
+enthält aber ausschließlich diese Übergabedatei und keinen Code — die Abweichung ist
+erwartet, die Verweise unten bleiben gültig.
 + nicht committete Änderungen in 1 Datei (`frontend/package-lock.json`, untracked — bewusst nicht committet, entstand durch lokales `npm install`)
 
 ## Ziel
