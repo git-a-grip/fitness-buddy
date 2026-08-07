@@ -26,13 +26,25 @@ laufen auf der NAS und die Haltung-Seite ist in DE/EN/ES bedienbar.
 - OpenRouter-Key funktioniert; 7 von 8 Free-Modellen antworten (Details unten).
 - Bildgenerierung über `google/gemini-2.5-flash-image` liefert brauchbare Ergebnisse.
 
-**Ungetestet / noch nicht live:**
-- Edge-Proxy (Commit a52a9ae) wurde **nie auf der NAS ausgeführt**. Weder der
-  `edge`-Container noch die Wartungsseite noch der geänderte `deploy.sh`-Ablauf
-  (ohne `docker compose down`) sind real erprobt.
-- Haltung-Seite und die posture-i18n-Seeds sind nicht deployed.
-- Die neuen Ports/Container-Zuschnitte (`app` ohne Host-Port, `edge` auf `${APP_PORT}`)
-  sind nur auf dem Papier geprüft.
+**Live (korrigiert am 2026-08-07 — der Abschnitt behauptete vorher das Gegenteil):**
+- Der Edge-Proxy **läuft** auf der NAS und tut das seit rund zwei Wochen.
+  `sudo docker ps` zeigt `fitness-buddy-edge` auf `0.0.0.0:8088->80/tcp` und
+  `fitness-buddy-app` ohne Host-Port auf `3000/tcp` — also genau die Aufteilung,
+  die hier als „nur auf dem Papier geprüft" stand.
+- Die NAS steht auf Commit `698fe0f`; `edge/` und `frontend/public/haltung/`
+  liegen dort. Die drei Commits wurden am 2026-06-27 per `sudo`-Deploy ausgerollt.
+- `https://fitness.dev.consult-the-future.org/api/health` antwortet mit `{"ok":true}`.
+
+**Weiterhin ungeprüft:**
+- Ob die Wartungsseite während eines `app`-Rebuilds tatsächlich ausgeliefert wird,
+  ist nie beobachtet worden — nur dass der Proxy im Normalbetrieb steht.
+- Ob die Haltung-Texte aus den Seeds kommen oder aus den Inline-Fallbacks.
+
+**Nur dev, kein prod:**
+- `main` und `prod` stehen beide unverändert auf dem Initial-Commit `fee2eb0`
+  vom 2026-05-23. Die gesamte App liegt in 11 Commits auf `dev`. Auf der NAS
+  existiert nur `fitness-buddy-dev`, und die Statusliste kennt nur eine
+  dev-Domain. Ein Neuklon muss `-b dev` verwenden — `main` wäre praktisch leer.
 
 **Bekannt unfertig:**
 - Die 5 Bilder tragen eingebrannten englischen Text, eines mit Tippfehler
@@ -195,8 +207,16 @@ laufen auf der NAS und die Haltung-Seite ist in DE/EN/ES bedienbar.
 
 ## Offene Punkte
 
-- **NAS-Deploy steht komplett aus.** Drei Commits (a52a9ae, 1e7f7b8, 698fe0f) liegen
-  ungetestet auf `dev`. Beim ersten Deploy zieht Docker `nginx:alpine` neu.
+- ~~NAS-Deploy steht komplett aus.~~ **Erledigt** — die drei Commits sind seit
+  2026-06-27 auf der NAS, der Edge-Proxy läuft. Siehe Abschnitt „Stand".
+- **NAS-Pfad geändert:** die App liegt seit 2026-08-07 unter
+  `~/Drive/docker/fitness-buddy-dev`, nicht mehr direkt unter `~/Drive`.
+- **Dateirechte:** `sudo ./deploy.sh` schreibt `.git/HEAD`, `.git/index` und
+  Teile des Arbeitsverzeichnisses als `root` mit `600`. Danach kann `wedon` das
+  Repo nicht mehr lesen — Git meldet irreführend „not a git repository".
+  Reparatur, mit `backend/data` (Postgres-Bind-Mount) ausgenommen:
+  `sudo find . -path ./backend/data -prune -o ! -user wedon -exec chown wedon:users {} +`
+  Das kommt nach jedem sudo-Deploy zurück, solange deploy.sh es nicht selbst richtet.
 - **Marketingseite ist nicht veröffentlicht.** `dist/` ist gebaut, der FTP-Upload
   (`npm run deploy` in `wu-consulting-relaunch`) wurde nicht ausgeführt. Das Projekt
   ist **kein Git-Repo** — es gibt dort keinen Commit-Stand als Rückfallebene.
@@ -217,9 +237,19 @@ laufen auf der NAS und die Haltung-Seite ist in DE/EN/ES bedienbar.
 
 ## Nächster Schritt
 
-Auf der NAS `sudo ./deploy.sh dev` in `/volume1/homes/wedon/Drive/fitness-buddy-dev`
-ausführen und dabei zwei Dinge belegen: dass der `edge`-Container startet und
-`${APP_PORT}` übernimmt, und dass während des `app`-Rebuilds die Wartungsseite
-ausgeliefert wird statt eines Verbindungsfehlers. Danach die Haltung-Seite unter
-`/haltung` in DE, EN und ES aufrufen und prüfen, ob die Texte aus den Seeds kommen
-(nicht aus den Inline-Fallbacks) — erkennbar am Tab-Label: EN „Form", ES „Técnica".
+Der ursprüngliche nächste Schritt (Edge-Proxy erstmals ausrollen) ist erledigt —
+er war schon erledigt, als diese Datei ihn noch als offen führte.
+
+Was bleibt, in dieser Reihenfolge:
+
+1. **Haltung-Seite inhaltlich prüfen.** `/haltung` in DE, EN und ES aufrufen und
+   feststellen, ob die Texte aus den Seeds kommen oder aus den Inline-Fallbacks —
+   erkennbar am Tab-Label: EN „Form", ES „Técnica".
+2. **Wartungsseite belegen.** Während eines `app`-Rebuilds prüfen, ob `edge`
+   die Wartungsseite ausliefert statt eines Verbindungsfehlers. Das war der
+   eigentliche Zweck des Proxys und ist als einziges nie beobachtet worden.
+3. **`deploy.sh` die Rechte selbst richten lassen**, damit der chown-Workaround
+   entfällt — eine Zeile am Ende, eng auf `.git` und das Arbeitsverzeichnis
+   begrenzt, `backend/data` ausgenommen.
+4. **Branch-Frage klären:** `dev` nach `main` mergen (sauberer Fast-Forward), oder
+   bewusst bei einer einzigen Umgebung bleiben.
