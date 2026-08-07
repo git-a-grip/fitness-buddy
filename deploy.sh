@@ -22,6 +22,23 @@ esac
 
 echo "==> Deploying fitness-buddy ($ENV_NAME, branch $BRANCH)"
 
+REPO_ROOT="$(pwd)"
+
+# Unter sudo schreibt root .git/HEAD, .git/index und ausgecheckte Dateien mit
+# Modus 0600. Danach kann der eigentliche Besitzer das Repo nicht mehr lesen —
+# Git meldet dann irreführend "not a git repository", obwohl alles vorhanden ist.
+# Deshalb am Ende die Besitzverhältnisse zurückdrehen, auch bei Abbruch (EXIT).
+#
+# backend/data ist ausgenommen: dort liegt der Postgres-Bind-Mount, dessen
+# Dateien der UID des DB-Containers gehören müssen. Ein pauschales chown -R
+# über das ganze Verzeichnis würde die Datenbank lahmlegen.
+restore_ownership() {
+  [ -n "${SUDO_USER:-}" ] || return 0
+  find "$REPO_ROOT" -path "$REPO_ROOT/backend/data" -prune -o \
+       ! -user "$SUDO_USER" -exec chown "$SUDO_USER" {} + 2>/dev/null || true
+}
+trap restore_ownership EXIT
+
 # Idempotent: dieses Verzeichnis als safe markieren, falls Owner ≠ aktueller User
 # (kommt vor, wenn Repo wedon gehört und Script unter sudo läuft)
 git config --global --add safe.directory "$(pwd)" 2>/dev/null || true
