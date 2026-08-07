@@ -45,12 +45,12 @@ App: <http://localhost:8088>
 
 Branch-Strategie: `dev` und `prod`.
 
-**Projektpfad auf der NAS:** `/volume1/homes/wedon/Drive/fitness-buddy-{dev,prod}` – nicht `/root/...`.
+**Projektpfad auf der NAS:** `/volume1/homes/wedon/Drive/docker/fitness-buddy-{dev,prod}` – nicht `/root/...`.
 
 **Erstinstallation:**
 
 ```bash
-cd /volume1/homes/wedon/Drive
+cd /volume1/homes/wedon/Drive/docker
 sudo git clone -b dev git@github.com:git-a-grip/fitness-buddy.git fitness-buddy-dev
 cd fitness-buddy-dev
 sudo cp .env.example .env.dev
@@ -62,7 +62,7 @@ sudo ./deploy.sh dev
 **Updates:**
 
 ```bash
-cd /volume1/homes/wedon/Drive/fitness-buddy-dev
+cd /volume1/homes/wedon/Drive/docker/fitness-buddy-dev
 sudo ./deploy.sh dev
 
 ```
